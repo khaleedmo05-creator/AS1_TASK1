@@ -1,0 +1,320 @@
+using System;
+using System.Collections.Generic;
+
+namespace AS1Task1
+
+{
+    enum Level
+    {
+        Easy,
+        Medium,
+        Hard
+    }
+
+    abstract class Question
+    {
+        public string Header { get; set; }
+        public int Mark { get; set; }
+        public Level Level { get; set; }
+
+        public abstract void Display();
+        public abstract int CheckAnswer(string answer);
+    }
+
+    class TrueFalseQuestion : Question
+    {
+        public bool CorrectAnswer { get; set; }
+
+        public override void Display()
+        {
+            Console.WriteLine(Header);
+            Console.WriteLine("1. True");
+            Console.WriteLine("2. False");
+        }
+
+        public override int CheckAnswer(string answer)
+        {
+            bool userAnswer = answer == "1";
+            return userAnswer == CorrectAnswer ? Mark : 0;
+        }
+    }
+
+    class ChooseOneQuestion : Question
+    {
+        public string[] Options { get; set; }
+        public int CorrectOptionIndex { get; set; }
+
+        public override void Display()
+        {
+            Console.WriteLine(Header);
+            for (int i = 0; i < Options.Length; i++)
+            {
+                Console.WriteLine($"{i + 1}. {Options[i]}");
+            }
+        }
+
+        public override int CheckAnswer(string answer)
+        {
+            return answer == CorrectOptionIndex.ToString() ? Mark : 0;
+        }
+    }
+
+    class MultipleChoiceQuestion : Question
+    {
+        public string[] Options { get; set; }
+        public int CorrectOptionIndex { get; set; }
+
+        public override void Display()
+        {
+            Console.WriteLine(Header);
+            for (int i = 0; i < Options.Length; i++)
+            {
+                Console.WriteLine($"{i + 1}. {Options[i]}");
+            }
+        }
+
+        public override int CheckAnswer(string answer)
+        {
+            return answer == CorrectOptionIndex.ToString() ? Mark : 0;
+        }
+    }
+
+    class ExaminationSystem
+    {
+        static List<Question> questionBank = new List<Question>();
+
+        public void Run()
+        {
+            bool exit = false;
+
+            while (!exit)
+            {
+                Console.WriteLine("\n1) Doctor Mode");
+                Console.WriteLine("2) Student Mode");
+                Console.WriteLine("3) Exit");
+                Console.Write("Choice: ");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        DoctorMode();
+                        break;
+                    case "2":
+                        StudentMode();
+                        break;
+                    case "3":
+                        exit = true;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice, try again.");
+                        break;
+                }
+            }
+        }
+
+        static void DoctorMode()
+        {
+            Console.Write("Number of questions to add: ");
+            int n = int.Parse(Console.ReadLine());
+
+            for (int i = 0; i < n; i++)
+            {
+                Console.WriteLine("\nSelect Question Type:");
+                Console.WriteLine("1) True / False");
+                Console.WriteLine("2) Choose One");
+                Console.WriteLine("3) Multiple Choice");
+                Console.Write("Choice: ");
+
+                string type = Console.ReadLine();
+                Question q;
+
+                if (type == "1")
+                {
+                    var tf = new TrueFalseQuestion();
+
+                    Console.Write("Header: ");
+                    tf.Header = Console.ReadLine();
+
+                    Console.Write("Marks: ");
+                    tf.Mark = int.Parse(Console.ReadLine());
+
+                    Console.Write("Correct Answer (1=True, 2=False): ");
+                    tf.CorrectAnswer = Console.ReadLine() == "1";
+
+                    q = tf;
+                }
+                else if (type == "2")
+                {
+                    var co = new ChooseOneQuestion();
+
+                    Console.Write("Header: ");
+                    co.Header = Console.ReadLine();
+
+                    Console.Write("Marks: ");
+                    co.Mark = int.Parse(Console.ReadLine());
+
+                    Console.Write("Number of options: ");
+                    int count = int.Parse(Console.ReadLine());
+                    co.Options = new string[count];
+
+                    for (int j = 0; j < count; j++)
+                    {
+                        Console.Write($"Option {j + 1}: ");
+                        co.Options[j] = Console.ReadLine();
+                    }
+
+                    Console.Write("Correct option number: ");
+                    co.CorrectOptionIndex = int.Parse(Console.ReadLine());
+
+                    q = co;
+                }
+                else
+                {
+                    var mc = new MultipleChoiceQuestion();
+
+                    Console.Write("Header: ");
+                    mc.Header = Console.ReadLine();
+
+                    Console.Write("Marks: ");
+                    mc.Mark = int.Parse(Console.ReadLine());
+
+                    Console.Write("Number of options: ");
+                    int count = int.Parse(Console.ReadLine());
+                    mc.Options = new string[count];
+
+                    for (int j = 0; j < count; j++)
+                    {
+                        Console.Write($"Option {j + 1}: ");
+                        mc.Options[j] = Console.ReadLine();
+                    }
+
+                    Console.Write("Correct option number: ");
+                    mc.CorrectOptionIndex = int.Parse(Console.ReadLine());
+
+                    q = mc;
+                }
+
+
+                Console.WriteLine("Select Question Level:");
+                Console.WriteLine("1) Easy");
+                Console.WriteLine("2) Medium");
+                Console.WriteLine("3) Hard");
+                Console.Write("Choice: ");
+
+                string lvl = Console.ReadLine();
+
+                switch (lvl)
+                {
+                    case "1":
+                        q.Level = Level.Easy;
+                        break;
+                    case "2":
+                        q.Level = Level.Medium;
+                        break;
+                    case "3":
+                        q.Level = Level.Hard;
+                        break;
+                    default:
+                        q.Level = Level.Easy;
+                        break;
+                }
+
+                questionBank.Add(q);
+            }
+        }
+
+        static void StudentMode()
+        {
+            if (questionBank.Count == 0)
+            {
+                Console.WriteLine("No questions available.");
+                return;
+            }
+
+            Console.WriteLine("Choose Exam Type:");
+            Console.WriteLine("1) Practical");
+            Console.WriteLine("2) Final");
+            Console.Write("Choice: ");
+
+            string examTypeChoice = Console.ReadLine();
+            bool isPractical;
+
+            if (examTypeChoice == "1")
+                isPractical = true;
+            else if (examTypeChoice == "2")
+                isPractical = false;
+            else
+            {
+                Console.WriteLine("Invalid exam type.");
+                return;
+            }
+
+            Console.WriteLine("\nChoose Exam Level:");
+            Console.WriteLine("1) Easy");
+            Console.WriteLine("2) Medium");
+            Console.WriteLine("3) Hard");
+            Console.Write("Choice: ");
+
+            string lvl = Console.ReadLine();
+            Level selectedLevel;
+
+            switch (lvl)
+            {
+                case "1":
+                    selectedLevel = Level.Easy;
+                    break;
+                case "2":
+                    selectedLevel = Level.Medium;
+                    break;
+                case "3":
+                    selectedLevel = Level.Hard;
+                    break;
+                default:
+                    Console.WriteLine("Invalid level.");
+                    return;
+            }
+
+            var examQuestions = questionBank.FindAll(q => q.Level == selectedLevel);
+
+            if (examQuestions.Count == 0)
+            {
+                Console.WriteLine("No questions available for this level.");
+                return;
+            }
+
+            if (isPractical)
+            {
+                examQuestions = examQuestions.GetRange(0, examQuestions.Count / 2);
+            }
+
+            int total = 0;
+            int score = 0;
+
+            foreach (var q in examQuestions)
+            {
+                q.Display();
+                Console.Write("Your answer: ");
+                string ans = Console.ReadLine();
+
+                score += q.CheckAnswer(ans);
+                total += q.Mark;
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine($"Your Result: {score} / {total}");
+        }
+
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            ExaminationSystem system = new ExaminationSystem();
+            system.Run();
+        }
+    }
+}
